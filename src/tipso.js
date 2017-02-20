@@ -46,7 +46,9 @@
       templateEngineFunc: null,         //A function that compiles and renders the content
       onBeforeShow      : null,
       onShow            : null,
-      onHide            : null
+      onHide            : null,
+      showEvents        : 'mouseover',  //The events that trigger the tooltip to be shown
+      hideEvents        : 'mouseout'    //The events that trigger the tooltip to be hidden
     };
 
   function Plugin(element, options) {
@@ -112,17 +114,29 @@
         $doc = this.doc;
       $e.addClass('tipso_style').removeAttr('title');
 
+      var showEvents = (typeof obj.settings.showEvents == 'object') ? obj.settings.showEvents : obj.settings.showEvents.split(' ');
+      for (var i in showEvents) {
+        showEvents[i] = String(showEvents[ i ] + '.' + pluginName).trim();
+      }
+      showEvents = showEvents.join( ' ' );
+      
+      var hideEvents = (typeof obj.settings.hideEvents == 'object') ? obj.settings.hideEvents : obj.settings.hideEvents.split(' ');
+      for (var i in hideEvents) {
+        hideEvents[i] = String(hideEvents[ i ] + '.' + pluginName).trim();
+      }
+      hideEvents = hideEvents.join( ' ' );
+
       if (obj.settings.tooltipHover) {
         var waitForHover = null,
             hoverHelper = null;
-        $e.on('mouseover' + '.' + pluginName, function() {
+        $e.on(showEvents, function() {
           clearTimeout(waitForHover);
           clearTimeout(hoverHelper);
           hoverHelper = setTimeout(function(){
             obj.show();
           }, 150);
         });
-        $e.on('mouseout' + '.' + pluginName, function() {
+        $e.on(hideEvents, function() {
           clearTimeout(waitForHover);
           clearTimeout(hoverHelper);
           waitForHover = setTimeout(function(){
@@ -143,10 +157,10 @@
         ;
         });
       } else {
-        $e.on('mouseover' + '.' + pluginName, function() {
+        $e.on(showEvents, function() {
           obj.show();
         });
-        $e.on('mouseout' + '.' + pluginName, function() {
+        $e.on(hideEvents, function() {
           obj.hide();
         });
       }
